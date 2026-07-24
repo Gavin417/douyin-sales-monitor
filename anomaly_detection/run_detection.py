@@ -33,9 +33,23 @@ def main():
     zero = load_csv(
         os.path.join(output_folder, "zero_sales_after_active.csv")
     )
+    
+    campaign = load_csv(
+        os.path.join(output_folder, "campaign_spike.csv")
+    )
+    
+    volatility = load_csv(
+        os.path.join(output_folder, "high_volatility.csv")
+    )
 
     anomaly_report = pd.concat(
-        [spike, drop, zero],
+        [
+            spike,
+            drop,
+            zero,
+            campaign,
+            volatility
+        ],
         ignore_index=True
     )
 
@@ -54,6 +68,8 @@ def main():
     print(f"Spike Records : {len(spike)}")
     print(f"Drop Records  : {len(drop)}")
     print(f"Zero Records  : {len(zero)}")
+    print(f"Campaign Records : {len(campaign)}")
+    print(f"High Volatility Records : {len(volatility)}")
 
     print("-" * 50)
 

@@ -1,5 +1,5 @@
 """
-Sales Spike Detection
+Campaign Spike Detection
 """
 
 import os
@@ -25,7 +25,7 @@ def assign_spike_severity(spike_ratio):
     else:
         return "Low"
 
-def detect_spike(df):
+def detect_campaign(df):
 
     spike_threshold = ANOMALY_CONFIG["spike_threshold"]
     min_sales = ANOMALY_CONFIG["min_sales"]
@@ -40,23 +40,33 @@ def detect_spike(df):
         / data["rolling_mean_7"]
     )
 
-    spike_df = data[
-        (data["daily_quantity"] >= min_sales)
-        &
-        (data["spike_ratio"] >= spike_threshold)
-    ].copy()
-
-    spike_df["anomaly_type"] = "SALES_SPIKE"
-    
-    spike_df["severity"] = spike_df["spike_ratio"].apply(assign_spike_severity)
-    
-    spike_df["reason"] = (
-        "Sales are "
-        + spike_df["spike_ratio"].round(2).astype(str)
-        + "x higher than the 7-day average."
+    campaign_df = data[
+    (data["daily_quantity"] >= min_sales)
+    &
+    (data["spike_ratio"] >= spike_threshold)
+    &
+    (
+        (data["is_618"] == 1)
+        |
+        (data["is_double11"] == 1)
+        |
+        (data["is_double12"] == 1)
+        |
+        (data["is_public_holiday"] == 1)
     )
+].copy()
 
-    return spike_df[
+    campaign_df["anomaly_type"] = "CAMPAIGN_SPIKE"
+    
+    campaign_df["severity"] = campaign_df["spike_ratio"].apply(assign_spike_severity)
+    
+    campaign_df["reason"] = (
+    "Campaign-driven sales spike: Sales are "
+    + campaign_df["spike_ratio"].round(2).astype(str)
+    + "x higher than the 7-day average."
+)
+
+    return campaign_df[
         [
             "sales_date",
             "sku_id",
@@ -75,10 +85,10 @@ if __name__ == "__main__":
 
     df = load_feature_data()
 
-    spike_df = detect_spike(df)
+    campaign_df = detect_campaign(df)
 
     # 显示前5条异常
-    print(spike_df.head())
+    print(campaign_df.head())
     print()
 
     # 创建 outputs 文件夹（如果不存在）
@@ -88,13 +98,13 @@ if __name__ == "__main__":
     # 保存结果
     output_path = os.path.join(
         output_folder,
-        "sales_spike.csv"
+        "campaign_spike.csv"
     )
 
-    spike_df.to_csv(
+    campaign_df.to_csv( 
         output_path,
         index=False
     )
 
     print(f"Saved to: {output_path}")
-    print(f"Spike Count: {len(spike_df)}")
+    print(f"Campaign Spike Count: {len(campaign_df)}")

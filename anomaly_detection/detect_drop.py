@@ -15,6 +15,13 @@ sys.path.append(
 from config import ANOMALY_CONFIG
 from load_data import load_feature_data
 
+def assign_drop_severity(drop_ratio):
+    if drop_ratio <= 0.10:
+        return "High"
+    elif drop_ratio <= 0.30:
+        return "Medium"
+    else:
+        return "Low"
 
 def detect_drop(df):
     """
@@ -46,6 +53,14 @@ def detect_drop(df):
     ].copy()
 
     drop_df["anomaly_type"] = "SALES_DROP"
+    
+    drop_df["severity"] = drop_df["drop_ratio"].apply(assign_drop_severity)
+
+    drop_df["reason"] = (
+        "Sales dropped to "
+        + (drop_df["drop_ratio"] * 100).round(1).astype(str)
+        + "% of the 7-day average."
+    )
 
     # More serious drops appear first
     drop_df = drop_df.sort_values(
@@ -61,6 +76,8 @@ def detect_drop(df):
             "daily_quantity",
             "rolling_mean_7",
             "drop_ratio",
+	    "severity",
+	    "reason",
             "anomaly_type"
         ]
     ]

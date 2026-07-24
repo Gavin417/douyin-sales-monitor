@@ -14,6 +14,13 @@ sys.path.append(
 
 from load_data import load_feature_data
 
+def assign_zero_sales_severity(rolling_mean):
+    if rolling_mean >= 20:
+        return "High"
+    elif rolling_mean >= 10:
+        return "Medium"
+    else:
+        return "Low"
 
 def detect_zero_sales(df):
     """
@@ -33,6 +40,17 @@ def detect_zero_sales(df):
     ].copy()
 
     zero_sales_df["anomaly_type"] = "ZERO_SALES_AFTER_ACTIVE"
+    
+    zero_sales_df["severity"] = (
+        zero_sales_df["rolling_mean_7"]
+        .apply(assign_zero_sales_severity)
+    )
+
+    zero_sales_df["reason"] = (
+        "Sales dropped to zero after averaging "
+        + zero_sales_df["rolling_mean_7"].round(1).astype(str)
+        + " units/day over the past 7 days."
+    )
 
     zero_sales_df = zero_sales_df.sort_values(
         by="rolling_mean_7",
@@ -46,6 +64,8 @@ def detect_zero_sales(df):
             "product_name",
             "daily_quantity",
             "rolling_mean_7",
+            "severity",
+            "reason",
             "anomaly_type"
         ]
     ]

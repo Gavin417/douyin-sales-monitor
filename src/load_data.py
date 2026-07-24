@@ -33,3 +33,7 @@ if __name__ == "__main__":
     print()
 
     print(df.shape)
+
+    print(df.columns.tolist())
+    
+    print(df["rolling_std_7"].describe())

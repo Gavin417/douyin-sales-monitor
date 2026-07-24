@@ -27,19 +27,17 @@ Spike Detection • Drop Detection • Zero Sales Detection
 # -----------------------------
 summary = pd.read_csv("outputs/dashboard_summary.csv")
 daily = pd.read_csv("outputs/dashboard_daily_sales.csv")
-
-spike = pd.read_csv("outputs/sales_spike.csv")
-drop = pd.read_csv("outputs/sales_drop.csv")
-
+anomaly = pd.read_csv("outputs/anomaly_report.csv")
 top = pd.read_csv("outputs/dashboard_top_products.csv")
+
+daily["sales_date"] = pd.to_datetime(daily["sales_date"])
+anomaly["sales_date"] = pd.to_datetime(anomaly["sales_date"])
 
 # ==========================
 # Sidebar
 # ==========================
 
 st.sidebar.header("📊 Filters")
-
-daily["sales_date"] = pd.to_datetime(daily["sales_date"])
 
 date_range = st.sidebar.date_input(
     "Date Range",
@@ -54,13 +52,34 @@ product_search = st.sidebar.text_input(
     ""
 )
 
+if product_search != "":
+    top = top[
+        top["product_name"]
+            .str.contains(
+                product_search,
+                case=False,
+                na=False
+            )
+    ]
+
+    anomaly = anomaly[
+        anomaly["product_name"]
+            .str.contains(
+                product_search,
+                case=False,
+                na=False
+            )
+    ]
+
 anomaly_type = st.sidebar.selectbox(
     "Anomaly Type",
     [
         "All",
-        "Spike",
-        "Drop",
-        "Zero"
+        "SALES_SPIKE",
+        "SALES_DROP",
+        "ZERO_SALES_AFTER_ACTIVE",
+        "CAMPAIGN_SPIKE",
+        "HIGH_VOLATILITY"
     ]
 )
 
@@ -71,47 +90,68 @@ top_n = st.sidebar.slider(
     20
 )
 
+if len(date_range) == 2:
+
+    start_date = pd.to_datetime(date_range[0])
+    end_date = pd.to_datetime(date_range[1])
+
+    daily = daily[
+        (daily["sales_date"] >= start_date)
+        & (daily["sales_date"] <= end_date)
+    ]
+
+    anomaly = anomaly[
+        (anomaly["sales_date"] >= start_date)
+        & (anomaly["sales_date"] <= end_date)
+    ]
+
+if anomaly_type != "All":
+
+    anomaly = anomaly[
+        anomaly["anomaly_type"] == anomaly_type
+    ]
+
+if product_search.strip():
+
+    anomaly = anomaly[
+        anomaly["product_name"]
+        .str.contains(
+            product_search,
+            case=False,
+            na=False
+        )
+    ]
 # -----------------------------
 # KPI Cards
 # -----------------------------
-col1, col2, col3, col4 = st.columns(4)
-
-col1.metric(
-    "Total Records",
-    int(summary.loc[0, "total_records"])
-)
-
-col2.metric(
-    "Products",
-    int(summary.loc[0, "total_products"])
-)
-
-col3.metric(
-    "Average Daily Sales",
-    round(summary.loc[0, "avg_daily_sales"], 2)
-)
-
-col4.metric(
-    "Total Sales",
-    int(summary.loc[0, "total_sales"])
-)
-
-st.divider()
-
-st.subheader("🚨 Anomaly Summary")
-
-c1, c2, c3 = st.columns(3)
+c1, c2, c3, c4, c5 = st.columns(5)
 
 c1.metric(
     "Sales Spike",
-    int(summary["total_spike"][0])
+    len(anomaly[anomaly["anomaly_type"] == "SALES_SPIKE"])
 )
 
 c2.metric(
     "Sales Drop",
-    int(summary["total_drop"][0])
+    len(anomaly[anomaly["anomaly_type"] == "SALES_DROP"])
 )
 
+c3.metric(
+    "Zero Sales",
+    len(anomaly[anomaly["anomaly_type"] == "ZERO_SALES_AFTER_ACTIVE"])
+)
+
+c4.metric(
+    "Campaign Spike",
+    len(anomaly[anomaly["anomaly_type"] == "CAMPAIGN_SPIKE"])
+)
+
+c5.metric(
+    "High Volatility",
+    len(anomaly[anomaly["anomaly_type"] == "HIGH_VOLATILITY"])
+)
+
+st.divider()
 # 你的 summary 里目前没有 zero_sales，
 # 先显示 0，后面我们再补上。
 c3.metric(
@@ -147,7 +187,9 @@ st.markdown("---")
 
 st.subheader("📉 Drop Analysis")
 
-drop_month = drop.copy()
+drop_month = anomaly[
+    anomaly["anomaly_type"] == "SALES_DROP"
+].copy()
 
 drop_month["sales_date"] = pd.to_datetime(
     drop_month["sales_date"]
@@ -181,14 +223,6 @@ st.plotly_chart(
 # -----------------------------
 # Top Products
 # -----------------------------
-st.markdown("---")
-
-st.subheader("🏆 Top 20 Products")
-
-top = pd.read_csv(
-    "outputs/dashboard_top_products.csv"
-)
-
 top["short_name"] = (
     top["product_name"]
     .str.slice(0, 20)
@@ -232,7 +266,9 @@ st.markdown("---")
 
 st.subheader("📊 Spike Analysis")
 
-spike_month = spike.copy()
+spike_month = anomaly[
+    anomaly["anomaly_type"] == "SALES_SPIKE"
+].copy()
 
 spike_month["sales_date"] = pd.to_datetime(
     spike_month["sales_date"]
@@ -271,37 +307,12 @@ st.markdown("---")
 
 st.subheader("📋 Anomaly Details")
 
-spike_table = spike.copy()
-drop_table = drop.copy()
+anomaly_table = anomaly.copy()
 
-spike_table["Type"] = "Spike"
-drop_table["Type"] = "Drop"
-
-spike_table = spike_table.rename(
-    columns={
-        "spike_ratio": "Ratio"
-    }
-)
-
-drop_table = drop_table.rename(
-    columns={
-        "drop_ratio": "Ratio"
-    }
-)
-
-anomaly_table = pd.concat(
-    [spike_table, drop_table],
-    ignore_index=True
-)
-
-anomaly_table = anomaly_table[
-    [
-        "sales_date",
-        "product_name",
-        "Type",
-        "Ratio"
+if anomaly_type != "All":
+    anomaly_table = anomaly_table[
+        anomaly_table["anomaly_type"] == anomaly_type
     ]
-]
 
 anomaly_table = anomaly_table.sort_values(
     "sales_date",
