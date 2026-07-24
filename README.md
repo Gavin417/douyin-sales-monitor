@@ -1,309 +1,121 @@
-# 📊 Sales Anomaly Dashboard
+# 📈 Sales Anomaly Dashboard
 
-> An interactive Streamlit dashboard for automated sales anomaly detection and business monitoring.
+An interactive sales anomaly detection dashboard built with Python, Pandas, Plotly and Streamlit.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red)
-![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-orange)
-![Plotly](https://img.shields.io/badge/Plotly-Visualization-green)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
+The project automatically detects abnormal sales behaviours from daily transaction data and provides an interactive dashboard for business monitoring.
 
 ---
 
-# 📌 Project Overview
+## 🚀 Features
 
-Retail businesses generate thousands of sales records every day. Manually identifying abnormal sales behaviour across hundreds of products is inefficient and often impossible.
+### 📊 Interactive Dashboard
 
-This project builds an **automated anomaly detection system** that continuously monitors daily sales and highlights unusual business events through an interactive dashboard.
+- Daily Sales Trend
+- Monthly Spike Analysis
+- Monthly Drop Analysis
+- Top Products Ranking
+- Anomaly Details Table
+- KPI Summary Cards
 
-The system automatically detects:
+### 🔍 Interactive Filters
 
-- 📈 Sales Spike
-- 📉 Sales Drop
-- 🚫 Zero Sales
-- 🏆 Top Selling Products
-- 📊 Monthly Anomaly Trends
+- Date Range Filter
+- Product Search
+- Anomaly Type Filter
+- Top-N Product Slider
 
-The final result is a business-friendly dashboard that enables analysts and managers to quickly discover abnormal sales behaviour and make data-driven decisions.
-
----
-
-# 🎯 Objectives
-
-The goal of this project is to:
-
-- Monitor daily product sales
-- Detect abnormal sales behaviour automatically
-- Visualize sales trends
-- Identify top-performing products
-- Support business decision making
-- Build an interactive dashboard for business users
+All charts and KPI metrics update dynamically based on user selections.
 
 ---
 
-# 📂 Dataset Summary
+## 🚨 Supported Anomaly Types
 
-| Metric | Value |
-|--------|-------|
-| Total Records | **24,287** |
-| Products | **660** |
-| Total Sales | **115,479** |
-| Time Range | **Dec 2024 – Jan 2026** |
+- Sales Spike
+- Sales Drop
+- Zero Sales After Active
+- Campaign Spike
+- High Volatility
 
----
+Each detected anomaly includes:
 
-# 🏗 Project Workflow
-
-```text
-                 Daily Sales Data
-                        │
-                        ▼
-               Data Cleaning
-                        │
-                        ▼
-           Feature Engineering
-                        │
-                        ▼
-         Rolling Mean Calculation
-                        │
-                        ▼
-       Spike / Drop Detection Logic
-                        │
-                        ▼
-        Monthly Aggregation & KPIs
-                        │
-                        ▼
-             CSV Output Files
-                        │
-                        ▼
-        Interactive Streamlit Dashboard
-```
-
----
-
-# 📊 Dashboard Features
-
-## 1️⃣ KPI Summary
-
-The dashboard provides overall business statistics.
-
-- Total Records
-- Products
-- Average Daily Sales
-- Total Sales
-
----
-
-## 2️⃣ Daily Sales Trend
-
-Interactive Plotly line chart showing:
-
-- Daily sales trend
-- Seasonal patterns
-- Long-term sales behaviour
-
-Business users can quickly identify unusual sales periods.
-
----
-
-## 3️⃣ Monthly Spike Analysis
-
-Displays the number of detected sales spikes each month.
-
-Useful for:
-
-- Promotion evaluation
-- Seasonal demand analysis
-- Marketing effectiveness
-
----
-
-## 4️⃣ Monthly Drop Analysis
-
-Displays the number of detected sales drops each month.
-
-Useful for:
-
-- Inventory monitoring
-- Supply chain issues
-- Product performance tracking
-
----
-
-## 5️⃣ Top Products
-
-Ranks the highest-selling products.
-
-Features:
-
-- Horizontal ranking
-- Hover to display full product name
-- Easy product comparison
-
----
-
-## 6️⃣ Anomaly Detail Table
-
-Interactive searchable table containing:
-
+- Severity
+- Reason
 - Sales Date
 - Product Name
-- Anomaly Type
-- Spike / Drop Ratio
-
-Users can sort and search anomalies for further investigation.
+- Daily Quantity
 
 ---
 
-# 🧮 Anomaly Detection Method
+## 🛠 Tech Stack
 
-The project uses a statistical rolling-window approach.
+- Python
+- Pandas
+- Plotly Express
+- Streamlit
+- PostgreSQL
+- NumPy
 
-For every product:
+---
 
-### Step 1
+## 📂 Project Structure
 
-Calculate a **7-day rolling average**
-
-```text
-Rolling Mean = Average(Sales over previous 7 days)
 ```
-
----
-
-### Step 2
-
-Compare today's sales with the rolling average.
-
----
-
-### Step 3
-
-Classify anomalies.
-
-## 📈 Sales Spike
-
-Current sales significantly exceed the rolling average.
-
-Example:
-
-Rolling Mean = 20
-
-Today's Sales = 80
-
-Spike Ratio = 4.0
-
----
-
-## 📉 Sales Drop
-
-Current sales fall significantly below the rolling average.
-
-Example:
-
-Rolling Mean = 40
-
-Today's Sales = 2
-
-Drop Ratio = 0.05
-
----
-
-## 🚫 Zero Sales
-
-Current sales equal zero.
-
----
-
-# 📁 Project Structure
-
-```text
 sales-anomaly-dashboard/
-
-│
-├── app.py                     # Streamlit dashboard
-├── dashboard.py
-├── README.md
-├── REPORT.md
-├── requirements.txt
 │
 ├── anomaly_detection/
+│   ├── detect_spike.py
+│   ├── detect_drop.py
+│   ├── detect_zero_sales.py
+│   ├── detect_campaign.py
+│   ├── detect_volatility.py
+│   └── run_detection.py
 │
 ├── outputs/
+│   ├── anomaly_report.csv
 │   ├── dashboard_summary.csv
 │   ├── dashboard_daily_sales.csv
 │   ├── dashboard_top_products.csv
-│   ├── dashboard_monthly_spikes.csv
-│   ├── dashboard_monthly_drops.csv
-│   ├── sales_spike.csv
-│   └── sales_drop.csv
+│   ├── campaign_spike.csv
+│   └── high_volatility.csv
 │
-├── charts/
-│
-├── sql/
-│
-├── src/
-│
-└── logs/
+├── app.py
+├── README.md
+└── requirements.txt
 ```
 
 ---
 
-# 💻 Technology Stack
+## 📈 Dashboard Components
 
-| Category | Technology |
-|----------|------------|
-| Programming Language | Python |
-| Dashboard | Streamlit |
-| Data Processing | Pandas |
-| Visualization | Plotly |
-| Database | PostgreSQL |
-| Version Control | Git |
-| Repository | GitHub |
+### KPI Cards
 
----
+- Sales Spike Count
+- Sales Drop Count
+- Zero Sales Count
+- Campaign Spike Count
+- High Volatility Count
 
-# 📈 Business Insights
+### Charts
 
-The dashboard enables business users to:
+- Daily Sales Trend
+- Monthly Spike Count
+- Monthly Drop Count
+- Top Products by Sales
 
-- Monitor abnormal sales automatically
-- Detect sudden demand changes
-- Discover seasonal sales behaviour
-- Evaluate marketing campaigns
-- Monitor inventory risk
-- Improve operational decision making
+### Detail Table
 
----
+The anomaly table contains:
 
-# 🚀 Future Improvements
-
-Future work may include:
-
-- Machine Learning anomaly detection
-  - Isolation Forest
-  - Local Outlier Factor
-  - Prophet
-
-- Real-time dashboard
-
-- Automatic email alerts
-
-- Product-level forecasting
-
-- Drill-down dashboard interaction
-
-- Inventory optimization
+- sales_date
+- product_name
+- anomaly_type
+- severity
+- reason
+- daily_quantity
 
 ---
 
-# ▶️ Installation
-
-Clone the repository
-
-```bash
-git clone https://github.com/gavinmay13/douyin-sales-monitor.git
-```
+## ▶️ Run the Dashboard
 
 Install dependencies
 
@@ -311,7 +123,13 @@ Install dependencies
 pip install -r requirements.txt
 ```
 
-Run Streamlit
+Run anomaly detection
+
+```bash
+python anomaly_detection/run_detection.py
+```
+
+Launch Streamlit
 
 ```bash
 streamlit run app.py
@@ -319,20 +137,17 @@ streamlit run app.py
 
 ---
 
-# 📸 Dashboard Preview
+## 📌 Future Improvements
 
-> *(Insert screenshots here after uploading dashboard images.)*
-
-Example:
-
-```
-charts/dashboard_home.png
-charts/dashboard_analysis.png
-```
+- Real-time anomaly monitoring
+- Email alert system
+- Database integration
+- Forecasting model integration
+- Interactive geographic visualization
 
 ---
 
-# 👨‍💻 Author
+## 👤 Author
 
-**Gavin Zhang**
+Gavin Zhang
 
